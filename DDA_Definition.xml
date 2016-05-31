@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+time = 0 ;
+speed = 0 ;
+rpm = 0 ;
+temperature = 0 ;
+throttle = 0 ;
+lap = 0 ;
+distance = 0 ;
+dtc = 0 ;
+gear = 0 ;
+calculatedDistance = 0 ;
+calculatedLap = 0 ;
+showLap = YES ;
