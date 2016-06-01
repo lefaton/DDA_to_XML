@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DDA_Definition version="DDA3">
-  <HeaderInfo size="22" blocsize="8"/>
-  <Entry>
-    <Param name="time" type="lint" defaultVal="0"/>
-    <Param name="speed" type="uint16" defaultVal="0"/>
-    <Param name="rpm" type="uint16" defaultVal="0"/>
-    <Param name="temperature" type="sint8" defaultVal="0"/>
-    <Param name="throttle" type="uint8" defaultVal="0"/>
-    <Param name="lap" type="uint16" defaultVal="0"/>
-    <Param name="distance" type="uint32" defaultVal="0"/>
-    <Param name="dtc" type="uint8" defaultVal="0"/>
-    <Param name="gear" type="uint16" defaultVal="0"/>
-    <Param name="calculatedDistance" type="uint32" defaultVal="0"/>
-    <Param name="calculatedLap" type="uint16" defaultVal="0"/>
-    <Param name="showLap" type="bool" defaultVal="true"/>
-  </Entry>
+<DDA_Definition version="DDA3" frequency="100" clock="0.01">
+  <HeaderInfo size="22" />
+  <EntryToRead>
+    <Param name="speed" bitsize="16" interval="0.10"/>
+    <Param name="rpm" bitsize="16" interval="0.02"/>
+    <Param name="temperature" bitsize="8" interval="1.0"/>
+    <Param name="throttle" bitsize="8" interval="0.05"/>
+    <Param name="lap" bitsize="8" interval="1.0"/>
+    <Param name="distance" bitsize="24" interval="1.0"/>
+    <Param name="dtc" bitsize="8" interval="0.05"/>
+  </EntryToRead>
+  <EntryToCompute>
+    <Param name="time" bitsize="64"/>
+    <Param name="gear" bitsize="16"/>
+    <Param name="calculatedDistance" bitsize="32"/>
+    <Param name="calculatedLap" bitsize="16"/>
+    <Param name="showLap" bitsize="1"/>
+  </EntryToCompute>
 </DDA_Definition>
