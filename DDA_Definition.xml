@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-time = 0 ;
-speed = 0 ;
-rpm = 0 ;
-temperature = 0 ;
-throttle = 0 ;
-lap = 0 ;
-distance = 0 ;
-dtc = 0 ;
-gear = 0 ;
-calculatedDistance = 0 ;
-calculatedLap = 0 ;
-showLap = YES ;
+<DDA_Definition version="DDA3">
+  <HeaderInfo size="22" blocsize="8"/>
+  <Entry>
+    <Param name="time" type="lint" defaultVal="0"/>
+    <Param name="speed" type="uint16" defaultVal="0"/>
+    <Param name="rpm" type="uint16" defaultVal="0"/>
+    <Param name="temperature" type="sint8" defaultVal="0"/>
+    <Param name="throttle" type="uint8" defaultVal="0"/>
+    <Param name="lap" type="uint16" defaultVal="0"/>
+    <Param name="distance" type="uint32" defaultVal="0"/>
+    <Param name="dtc" type="uint8" defaultVal="0"/>
+    <Param name="gear" type="uint16" defaultVal="0"/>
+    <Param name="calculatedDistance" type="uint32" defaultVal="0"/>
+    <Param name="calculatedLap" type="uint16" defaultVal="0"/>
+    <Param name="showLap" type="bool" defaultVal="true"/>
+  </Entry>
+</DDA_Definition>
