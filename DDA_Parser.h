@@ -1,11 +1,15 @@
 #include "DDA_FileFormat.h"
 
-class CParser{
+class CDDAParser{
+
 public:
-	void ParseFile(char* fileName);
+
+	CDDAParser::CDDAParser(){}
+	CDDAParser::~CDDAParser(){}
+
+	void ParseFile(char* fileName, SDDADefinition* definition);
+
 private:
 
-	void* GetNextPos();
-	
 
 };
