@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DDA_Definition version="DDA3" frequency="100" clock="0.01">
-  <HeaderInfo size="22" />
+<DDA_Definition version="3" frequency="100" clock="0.01" headersize="22">
   <EntryToRead>
     <Param name="speed" bitsize="16" interval="0.10"/>
     <Param name="rpm" bitsize="16" interval="0.02"/>
@@ -10,11 +9,4 @@
     <Param name="distance" bitsize="24" interval="1.0"/>
     <Param name="dtc" bitsize="8" interval="0.05"/>
   </EntryToRead>
-  <EntryToCompute>
-    <Param name="time" bitsize="64"/>
-    <Param name="gear" bitsize="16"/>
-    <Param name="calculatedDistance" bitsize="32"/>
-    <Param name="calculatedLap" bitsize="16"/>
-    <Param name="showLap" bitsize="1"/>
-  </EntryToCompute>
 </DDA_Definition>
