@@ -64,6 +64,7 @@ void CDDAParser::ParseFile(const char* fileName, SDDADefinition* definition)
 					DDAVersion = 1;//we have a Version 3 DDA file? - no traction control
 
 				m_seekPos += 296;//add 296 to the fileCursor position
+				m_seekPos += 1069;//v4 premier data : data offset: 0x42e=1070
 			}			
 		}
 		else
