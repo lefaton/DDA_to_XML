@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<DDA_Definition version="3" frequency="100" clock="0.01" headersize="22">
+<DDA_Definition version="4" frequency="100" clock="0.01" headersize="22">
   <EntryToRead>
     <Param name="speed" bitsize="16" interval="0.10"/>
     <Param name="rpm" bitsize="16" interval="0.02"/>

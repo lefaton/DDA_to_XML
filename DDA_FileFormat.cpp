@@ -1,5 +1,7 @@
 #include "DDA_FileFormat.h"
 
+
+
 void CDDA_FileFormat::ReadXMLDefinitionFile()
 {
 	pugi::xml_document doc;
@@ -17,11 +19,11 @@ void CDDA_FileFormat::ReadXMLDefinitionFile()
 	for (pugi::xml_node param = paramListNode.child("Param"); param; param = param.next_sibling("Param"))
 	{
 		SDDAParam pa;
-        
-		int size = strlen(param.attribute("name").value());//doesn't work...
-		pa.name = new char[size];
-		memcpy(pa.name, param.attribute("name").value(), size);
 
+		char* nameStr = (char *)malloc((strlen(param.attribute("name").value()) + 1)*sizeof(char));
+		sprintf_s(nameStr, strlen(param.attribute("name").value()) + 1, "%s", param.attribute("name").value());
+	
+		pa.name = nameStr;
 		pa.bitsize = param.attribute("bitsize").as_int();
 		pa.interval = param.attribute("interval").as_float();
 

@@ -8,18 +8,17 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
+	int result = -1;
 	if (argc < 2)
 	{
-		return -1;
+		return result;
 	}
 
-	char a;
-	scanf_s("%c", &a);
-
-	ofstream myDDAfile;
+	ifstream myDDAfile;
 	myDDAfile.open(argv[1]);
 	if (myDDAfile.is_open())
 	{
+		myDDAfile.close();
 		printf_s("DDA file %s exists!\n", argv[1]);
 		CDDAParser* myParser = new CDDAParser();
 
@@ -27,15 +26,20 @@ int main(int argc, char *argv[])
 		if (myDDAFileFormat->InitDefinition()==1)
 		{
 			printf_s("DDA XML definition file loaded!\n");
-			myDDAFileFormat->PrintDefinition();
+			if (DEBUG_ON)
+			{
+				myDDAFileFormat->PrintDefinition();
+			}
 
 			myParser->ParseFile(argv[1], myDDAFileFormat->GetDefinition());
-			
-			return 1;
-		}
 
-		myDDAfile.close();
+			result = 1;
+		}
+		
 	}
 
-	return -1;
+	char a;
+	scanf_s("%c", &a);
+
+	return result;
 }

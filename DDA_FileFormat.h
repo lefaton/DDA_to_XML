@@ -4,8 +4,6 @@
 
 #include "libs/pugixml/src/pugixml.hpp"
 
-#define PARAMETERS_NAME_SIZE 16
-
 struct SDDAParam{
 
 	SDDAParam::SDDAParam()
@@ -25,6 +23,15 @@ struct SDDADefinition{
         
 	}
 
+	SDDADefinition::~SDDADefinition()
+	{
+		//std::vector<SDDAParam>::iterator it = inputParameters.begin();
+		//while (it != inputParameters.end())
+		//{
+		//	free (it->name);
+		//	it++;
+		//}
+	}
 	unsigned int DDAversion;
 	unsigned int frequency;
 	float clock;
