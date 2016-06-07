@@ -31,7 +31,7 @@
         <Param name="dtc" bitsize="8" interval="0.05"/>
       </EntryToRead>
     </DDA_Definition>
-    <DDA_Definition version="4" frequency="100" clock="0.01" headersize="1069">
+    <DDA_Definition version="4" frequency="100" clock="0.01" headersize="1070">
       <EntryToRead>
         <Param name="speed" bitsize="16" interval="0.10"/>
         <Param name="rpm" bitsize="16" interval="0.02"/>

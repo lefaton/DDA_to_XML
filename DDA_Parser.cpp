@@ -5,7 +5,7 @@
 
 using namespace std;
 
-//#pragma optimize("",off)
+#pragma optimize("",off)
 
 void CDDAParser::WriteDDAXMLFile(const char* fileName, ifstream* stream)
 {	
