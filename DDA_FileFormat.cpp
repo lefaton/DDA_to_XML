@@ -1,49 +1,61 @@
 #include "DDA_FileFormat.h"
 
-
-
-void CDDA_FileFormat::ReadXMLDefinitionFile()
+void CDDA_FileFormat::ReadXMLDefinitionFile(unsigned int version)
 {
+	if (version == 0)
+	{
+		std::cout << "[ERROR] DDA version not found!" << std::endl;
+		return;
+	}
 	pugi::xml_document doc;
 	pugi::xml_parse_result result = doc.load_file("DDA_Definition.xml");
+	std::cout << "DDA_Definition: " << result.description() << std::endl;
 
-	std::cout << "Load result: " << result.description() << " - DDA Version : " << doc.child("DDA_Definition").attribute("version").value() << std::endl;
-
-	SDDADefinition def;
-	def.DDAversion = doc.child("DDA_Definition").attribute("version").as_int();
-	def.frequency = doc.child("DDA_Definition").attribute("frequency").as_int();
-	def.clock = doc.child("DDA_Definition").attribute("clock").as_float();
-	def.headerSize = doc.child("DDA_Definition").attribute("headersize").as_int();
-
-	pugi::xml_node paramListNode = doc.child("DDA_Definition").child("EntryToRead");
-	for (pugi::xml_node param = paramListNode.child("Param"); param; param = param.next_sibling("Param"))
+	pugi::xml_node defListNode = doc.child("DDA_Definitions");
+	for (pugi::xml_node definition = defListNode.child("DDA_Definition"); definition; definition = definition.next_sibling("DDA_Definition"))
 	{
-		SDDAParam pa;
+		if (version != definition.attribute("version").as_uint())
+		{
+			continue;
+		}
+		std::cout << "DDA Version : " << definition.attribute("version").value() << std::endl;
 
-		char* nameStr = (char *)malloc((strlen(param.attribute("name").value()) + 1)*sizeof(char));
-		sprintf_s(nameStr, strlen(param.attribute("name").value()) + 1, "%s", param.attribute("name").value());
-	
-		pa.name = nameStr;
-		pa.bitsize = param.attribute("bitsize").as_int();
-		pa.interval = param.attribute("interval").as_float();
+		SDDADefinition def;
+		def.DDAversion = definition.attribute("version").as_int();
+		def.frequency = definition.attribute("frequency").as_int();
+		def.clock = definition.attribute("clock").as_float();
+		def.headerSize = definition.attribute("headersize").as_int();
 
-		def.inputParameters.push_back(pa);
+		pugi::xml_node paramListNode = definition.child("EntryToRead");
+		for (pugi::xml_node param = paramListNode.child("Param"); param; param = param.next_sibling("Param"))
+		{
+			SDDAParam pa;
+
+			char* nameStr = (char *)malloc((strlen(param.attribute("name").value()) + 1)*sizeof(char));
+			sprintf_s(nameStr, strlen(param.attribute("name").value()) + 1, "%s", param.attribute("name").value());
+
+			pa.name = nameStr;
+			pa.bitsize = param.attribute("bitsize").as_int();
+			pa.interval = param.attribute("interval").as_float();
+
+			def.inputParameters.push_back(pa);
+		}
+
+		m_definition = def;
 	}
-
-	m_definition = def;
 }
 
-int CDDA_FileFormat::InitDefinition()
+int CDDA_FileFormat::InitDefinition(unsigned int version)
 {
 	pugi::xml_document doc;
 	if (doc.load_file("DDA_Definition.xml"))
 	{
-		ReadXMLDefinitionFile();
+		ReadXMLDefinitionFile(version);
 		return 1;
 	}
 	else
 	{
-		printf_s("ERROR while trying to open DDA_Definition.xml");
+		std::cout << "[ERROR] while trying to open DDA_Definition.xml" << std::endl;
 		return -1;
 	}
 }

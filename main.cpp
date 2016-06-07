@@ -19,23 +19,11 @@ int main(int argc, char *argv[])
 	if (myDDAfile.is_open())
 	{
 		myDDAfile.close();
-		printf_s("DDA file %s exists!\n", argv[1]);
+		std::cout << "DDA file " << argv[1] << " exists!" <<std::endl;
 		CDDAParser* myParser = new CDDAParser();
+        myParser->ParseFile(argv[1]);
 
-		CDDA_FileFormat* myDDAFileFormat = new CDDA_FileFormat();
-		if (myDDAFileFormat->InitDefinition()==1)
-		{
-			printf_s("DDA XML definition file loaded!\n");
-			if (DEBUG_ON)
-			{
-				myDDAFileFormat->PrintDefinition();
-			}
-
-			myParser->ParseFile(argv[1], myDDAFileFormat->GetDefinition());
-
-			result = 1;
-		}
-		
+		result = 1;
 	}
 
 	char a;

@@ -5,7 +5,52 @@
 
 using namespace std;
 
-#pragma optimize("",off)
+//#pragma optimize("",off)
+
+void CDDAParser::WriteDDAXMLFile(const char* fileName, ifstream* stream)
+{	
+	//XML stuff
+	pugi::xml_document doc;
+    
+
+
+	//parsing param
+	unsigned int counter = 0;
+	char* buffer = new char[16];
+	unsigned int freq = m_definition->frequency;
+	unsigned int bytesToRead = 0;
+
+	while (m_seekPos < m_fileSize)
+	{
+		std::cout << "[TEST] ";
+		std::vector<SDDAParam>::iterator it = m_definition->inputParameters.begin();
+		while ( it != m_definition->inputParameters.end() )
+		{ 	
+			if (counter == 0 || (counter % (unsigned int)(freq*it->interval) == 0))
+			{
+				bytesToRead = (unsigned int)it->bitsize / BYTE_SIZE;
+				GetBytes(stream, buffer, bytesToRead, m_seekPos);
+				std::cout << " " << it->name << "=";
+				for (unsigned int i = 0; i < bytesToRead; i++)
+				{
+					std::cout << buffer[i];
+				}
+				std::cout << " / ";
+				m_seekPos += bytesToRead;
+			}
+			it++;
+		}
+		std::cout << std::endl;
+		counter++;
+
+
+		if (counter % freq == 0)
+		{
+			counter = 0;
+		}
+	}
+
+}
 
 streampos CDDAParser::GetBytes(ifstream* file, char* buffer, unsigned int size, unsigned int offset)
 {
@@ -13,20 +58,20 @@ streampos CDDAParser::GetBytes(ifstream* file, char* buffer, unsigned int size, 
 	file->read(buffer, size);
 	if (DEBUG_ON)
 	{
-		printf_s("[DEBUG]");
+		std::cout << "[DEBUG]";
 		for (unsigned int i = 0; i < size; i++)
 		{
-			printf_s("%c", buffer[i]);
+			std::cout << buffer[i];
 		}
-		printf_s("\n");
+		std::cout << std::endl;
 	}
 	return file->tellg();
 }
 
-void CDDAParser::ParseFile(const char* fileName, SDDADefinition* definition)
+void CDDAParser::ParseFile(const char* fileName)
 {
-	m_definition = definition;
-	m_seekPos = -1;
+	
+	m_seekPos = 0;
 
 	ifstream myDDAfile;
 	myDDAfile.open(fileName, std::ifstream::binary | ios::in);
@@ -34,10 +79,34 @@ void CDDAParser::ParseFile(const char* fileName, SDDADefinition* definition)
 	if (myDDAfile.is_open() && myDDAfile.good())
 	{
 		streampos pos;
+		
+		//get DDA version to read
+		char versionChar[2];
+		myDDAfile.get(*versionChar);
+		unsigned int version = (unsigned char)versionChar[0];
+
+		//actually get XML definition
+		CDDA_FileFormat* myDDAFileFormat = new CDDA_FileFormat();
+		if (myDDAFileFormat->InitDefinition(version) == 1)
+		{
+			std::cout << "DDA XML definition file loaded!\n" << std::endl;
+			if (DEBUG_ON)
+			{
+				myDDAFileFormat->PrintDefinition();
+			}
+		}
+		else
+		{
+			myDDAfile.close();
+			std::cout << "[ERROR] XML definition file error" << std::endl;
+			return;
+		}
+
+		m_definition = myDDAFileFormat->GetDefinition();
 
 		// get length of file:
 		myDDAfile.seekg(0, myDDAfile.end);
-		m_fileSize = myDDAfile.tellg();
+		m_fileSize = (unsigned int)myDDAfile.tellg();
 		myDDAfile.seekg(0, myDDAfile.beg);
 
 		//read header first
@@ -48,28 +117,12 @@ void CDDAParser::ParseFile(const char* fileName, SDDADefinition* definition)
 		unsigned int DDAVersion = 0;
 		if (headerBuffer[2] == 'D' && headerBuffer[3] == 'D' && headerBuffer[4] == 'A')
 		{
-			if (headerBuffer[0] == 2)
-			{
-				DDAVersion = 1;//we have a Version 2 DDA file? - no traction control
-				m_seekPos += m_definition->headerSize;
-			}
-			else if (headerBuffer[0] == 3 || headerBuffer[0] == 4)
-			{
-				char* DDABuffer = (char *)malloc(16*sizeof(char));
-				GetBytes(&myDDAfile, DDABuffer, 16, 160); //get first 16 bytes from address 00A0 arbitrary chosen
-
-				if (DDABuffer[14] != 255)
-					DDAVersion = 2;//we have a Version 3 DDA file? - traction control
-				else
-					DDAVersion = 1;//we have a Version 3 DDA file? - no traction control
-
-				m_seekPos += 296;//add 296 to the fileCursor position
-				m_seekPos += 1069;//v4 premier data : data offset: 0x42e=1070
-			}			
+			m_seekPos += m_definition->headerSize;
+			WriteDDAXMLFile(fileName, &myDDAfile);
 		}
 		else
 		{
-			printf_s("[ERROR] Not a DDA file - %s\n",fileName);
+			std::cout << "[ERROR] Not a DDA file - " << fileName << std::endl;
 		}
 
 		myDDAfile.close();

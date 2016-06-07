@@ -1,3 +1,20 @@
+/*
+DDAToXML Converter - Copyright (c) 2016 Matthieu Dirrenberger
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files(the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and / or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions :
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+This program idea is mainly based on the work done by Andrew Allan in 2009.
+The white paper he wrote and the code he gave me was really helpfull for speedup
+the reverse engineering part.
+*/
 #include <iostream>
 #include <string>
 #include <vector>
@@ -49,11 +66,11 @@ public:
 	CDDA_FileFormat::~CDDA_FileFormat(){}
 	
 	SDDADefinition* GetDefinition(){ return &m_definition; }
-	int InitDefinition();
+	int InitDefinition(unsigned int version);
 	void PrintDefinition();
 
 private:
-	void ReadXMLDefinitionFile();
+	void ReadXMLDefinitionFile(unsigned int version);
 
 	SDDADefinition m_definition;
 };
