@@ -4,53 +4,14 @@ using namespace std;
 
 #pragma optimize("",off)
 
-#define OSSwapConstInt2(x) \
-    ((unsigned int)((((unsigned int)(x) & 0xff00) << 8) | \
-                (((unsigned int)(x) & 0x00ff)  >> 8)))
-
-#define OSSwapConstInt3(x) \
-    ((unsigned long int)((((unsigned long int)(x) & 0xff000000) << 24) | \
-                (((unsigned long int)(x) & 0x00ff0000) << 8) | \
-                (((unsigned long int)(x) & 0x0000ff00) >> 8) | \
-                (((unsigned long int)(x) & 0x000000ff) >> 24)));
-
-#define OSSwapConstInt4(x) \
-    ((unsigned long int)((((unsigned long int)(x) & 0xff000000) << 24) | \
-                (((unsigned long int)(x) & 0x00ff0000) << 8) | \
-                (((unsigned long int)(x) & 0x0000ff00) >> 8) | \
-                (((unsigned long int)(x) & 0x000000ff) >> 24)));
-
-#define SWAP_2(x) ( (((unsigned short)(x) & 0xff) << 8) | ((unsigned short)(x) >> 8) )
-#define SWAP_4(x) ( ((unsigned long int)(x) << 24) | \
-         (((unsigned long int)(x) << 8) & 0x00ff0000) | \
-         (((unsigned long int)(x) >> 8) & 0x0000ff00) | \
-         ((unsigned long int)(x) >> 24) )
-
-unsigned int SwapHexUInt(char* buffer, unsigned int size)
+unsigned int ReadHexUInt(char* buffer, unsigned int size)
 {
 	unsigned int valueResult = 0;
+	stringstream sb;
+	sb << buffer;
 
-	switch (size)
-	{
-	case 1:
-	{
-		valueResult = (unsigned int)(buffer);
-		break;
-	}
-	case 2:
-	{
-		valueResult = OSSwapConstInt2(buffer);
-		break;
-	}
-	case 3:
-	{
-		valueResult = SWAP_2(buffer);
-		break;
-	}
+	sb >> std::u32string >> valueResult;
 
-	default:
-		break;
-	}
 	return valueResult;
 }
 
@@ -79,7 +40,7 @@ void CDDAParser::WriteDDAXMLFile(const char* fileName, ifstream* stream)
 				GetBytes(stream, buffer, bytesToRead, m_seekPos);
 				
 				//GetLittleEndian
-				unsigned int  valueResult = SwapHexUInt(buffer, bytesToRead);			
+				unsigned int  valueResult = ReadHexUInt(buffer, bytesToRead);
 				
 				if (DEBUG_ON)
 				{

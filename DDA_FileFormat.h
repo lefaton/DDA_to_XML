@@ -21,6 +21,7 @@ pugixml is Copyright (C) 2006-2015 Arseny Kapoulkine.
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 

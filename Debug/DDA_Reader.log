@@ -1,16 +1,11 @@
-﻿Build started 09/06/2016 01:20:08.
+﻿Build started 09/06/2016 08:49:02.
      1>Project "C:\Users\Chat\Documents\GitHub\DDA_Reader\DDA_Reader.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl- /Ox /Oy- /D _MBCS /Gm /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt DDA_Parser.cpp
          DDA_Parser.cpp
-       Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Chat\Documents\GitHub\DDA_Reader\Debug\DDA_Reader.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Chat\Documents\GitHub\DDA_Reader\Debug\DDA_Reader.pdb" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Chat\Documents\GitHub\DDA_Reader\Debug\DDA_Reader.lib" /MACHINE:X86 Debug\DDA_FileFormat.obj
-         Debug\DDA_Parser.obj
-         Debug\main.obj
-         libs\pugixml\lib\pugixml.obj
-         DDA_Reader.vcxproj -> C:\Users\Chat\Documents\GitHub\DDA_Reader\Debug\DDA_Reader.exe
-     1>Done Building Project "C:\Users\Chat\Documents\GitHub\DDA_Reader\DDA_Reader.vcxproj" (Build target(s)).
+     1>DDA_Parser.cpp(13): error C2275: 'std::u32string' : illegal use of this type as an expression
+     1>Done Building Project "C:\Users\Chat\Documents\GitHub\DDA_Reader\DDA_Reader.vcxproj" (Build target(s)) -- FAILED.
 
-Build succeeded.
+Build FAILED.
 
-Time Elapsed 00:00:00.71
+Time Elapsed 00:00:00.36
