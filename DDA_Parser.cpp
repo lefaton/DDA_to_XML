@@ -1,11 +1,58 @@
-#include <iostream>
-#include <fstream>
-
 #include "DDA_Parser.h"
 
 using namespace std;
 
 #pragma optimize("",off)
+
+#define OSSwapConstInt2(x) \
+    ((unsigned int)((((unsigned int)(x) & 0xff00) << 8) | \
+                (((unsigned int)(x) & 0x00ff)  >> 8)))
+
+#define OSSwapConstInt3(x) \
+    ((unsigned long int)((((unsigned long int)(x) & 0xff000000) << 24) | \
+                (((unsigned long int)(x) & 0x00ff0000) << 8) | \
+                (((unsigned long int)(x) & 0x0000ff00) >> 8) | \
+                (((unsigned long int)(x) & 0x000000ff) >> 24)));
+
+#define OSSwapConstInt4(x) \
+    ((unsigned long int)((((unsigned long int)(x) & 0xff000000) << 24) | \
+                (((unsigned long int)(x) & 0x00ff0000) << 8) | \
+                (((unsigned long int)(x) & 0x0000ff00) >> 8) | \
+                (((unsigned long int)(x) & 0x000000ff) >> 24)));
+
+#define SWAP_2(x) ( (((unsigned short)(x) & 0xff) << 8) | ((unsigned short)(x) >> 8) )
+#define SWAP_4(x) ( ((unsigned long int)(x) << 24) | \
+         (((unsigned long int)(x) << 8) & 0x00ff0000) | \
+         (((unsigned long int)(x) >> 8) & 0x0000ff00) | \
+         ((unsigned long int)(x) >> 24) )
+
+unsigned int SwapHexUInt(char* buffer, unsigned int size)
+{
+	unsigned int valueResult = 0;
+
+	switch (size)
+	{
+	case 1:
+	{
+		valueResult = (unsigned int)(buffer);
+		break;
+	}
+	case 2:
+	{
+		valueResult = OSSwapConstInt2(buffer);
+		break;
+	}
+	case 3:
+	{
+		valueResult = SWAP_2(buffer);
+		break;
+	}
+
+	default:
+		break;
+	}
+	return valueResult;
+}
 
 void CDDAParser::WriteDDAXMLFile(const char* fileName, ifstream* stream)
 {	
@@ -30,12 +77,15 @@ void CDDAParser::WriteDDAXMLFile(const char* fileName, ifstream* stream)
 			{
 				bytesToRead = (unsigned int)it->bitsize / BYTE_SIZE;
 				GetBytes(stream, buffer, bytesToRead, m_seekPos);
-				std::cout << " " << it->name << "=";
-				for (unsigned int i = 0; i < bytesToRead; i++)
+				
+				//GetLittleEndian
+				unsigned int  valueResult = SwapHexUInt(buffer, bytesToRead);			
+				
+				if (DEBUG_ON)
 				{
-					std::cout << buffer[i];
+					std::cout << " / " << it->name << "=" << valueResult;
 				}
-				std::cout << " / ";
+
 				m_seekPos += bytesToRead;
 			}
 			it++;
@@ -52,11 +102,11 @@ void CDDAParser::WriteDDAXMLFile(const char* fileName, ifstream* stream)
 
 }
 
-streampos CDDAParser::GetBytes(ifstream* file, char* buffer, unsigned int size, unsigned int offset)
+unsigned int CDDAParser::GetBytes(ifstream* file, char* buffer, unsigned int size, unsigned int offset)
 {
 	file->seekg(offset, ios::beg);
 	file->read(buffer, size);
-	if (DEBUG_ON)
+	if (1)
 	{
 		std::cout << "[DEBUG]";
 		for (unsigned int i = 0; i < size; i++)
@@ -65,7 +115,7 @@ streampos CDDAParser::GetBytes(ifstream* file, char* buffer, unsigned int size, 
 		}
 		std::cout << std::endl;
 	}
-	return file->tellg();
+	return size;
 }
 
 void CDDAParser::ParseFile(const char* fileName)
@@ -78,8 +128,6 @@ void CDDAParser::ParseFile(const char* fileName)
 
 	if (myDDAfile.is_open() && myDDAfile.good())
 	{
-		streampos pos;
-		
 		//get DDA version to read
 		char versionChar[2];
 		myDDAfile.get(*versionChar);
@@ -111,7 +159,7 @@ void CDDAParser::ParseFile(const char* fileName)
 
 		//read header first
 		char* headerBuffer = new char[m_definition->headerSize*sizeof(char)];
-		pos = GetBytes(&myDDAfile, headerBuffer, m_definition->headerSize, 0);
+		GetBytes(&myDDAfile, headerBuffer, m_definition->headerSize, 0);
 
 		//process header info
 		unsigned int DDAVersion = 0;

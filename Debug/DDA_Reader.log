@@ -1,4 +1,4 @@
-﻿Build started 07/06/2016 00:37:51.
+﻿Build started 09/06/2016 01:20:08.
      1>Project "C:\Users\Chat\Documents\GitHub\DDA_Reader\DDA_Reader.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl- /Ox /Oy- /D _MBCS /Gm /EHsc /MD /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt DDA_Parser.cpp

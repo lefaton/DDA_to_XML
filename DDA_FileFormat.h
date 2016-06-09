@@ -13,9 +13,14 @@ all copies or substantial portions of the Software.
 
 This program idea is mainly based on the work done by Andrew Allan in 2009.
 The white paper he wrote and the code he gave me was really helpfull for speedup
-the reverse engineering part.
+the reverse engineering part (http://www.ducati.ms/).
+
+This software XML parser/writer is based on pugixml library (http://pugixml.org).
+pugixml is Copyright (C) 2006-2015 Arseny Kapoulkine.
 */
+
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -23,14 +28,23 @@ the reverse engineering part.
 
 struct SDDAParam{
 
-	SDDAParam::SDDAParam()
-	{
+	SDDAParam::SDDAParam() :name(nullptr), bitsize(8), interval(1.0), op(EOperator::nil), val(0)
+	{}
 
-	}
+	enum EOperator{
+		add,
+		sub,
+		mul,
+		div,
+		nil,
+		endOfOperator,
+	};
 
 	char* name;
-	unsigned int bitsize;
-	float interval;
+	unsigned int bitsize; //bit storage size for the current parameter
+	float interval; //update interval within a second
+	EOperator op; //operator to apply after the binary read for transform it in human readable value
+	unsigned int val; //value used by the operator
 };
 
 struct SDDADefinition{

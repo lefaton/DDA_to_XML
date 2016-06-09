@@ -13,7 +13,10 @@ all copies or substantial portions of the Software.
 
 This program idea is mainly based on the work done by Andrew Allan in 2009.
 The white paper he wrote and the code he gave me was really helpfull for speedup
-the reverse engineering part.
+the reverse engineering part (http://www.ducati.ms/).
+
+This software XML parser/writer is based on pugixml library (http://pugixml.org).
+pugixml is Copyright (C) 2006-2015 Arseny Kapoulkine.
 */
 
 #include "DDA_FileFormat.h"
@@ -33,7 +36,7 @@ public:
 
 private:
 
-	streampos GetBytes(ifstream* file, char* buffer, unsigned int size, unsigned int offset = 0);
+	unsigned int GetBytes(ifstream* file, char* buffer, unsigned int size, unsigned int offset = 0);
 	void WriteDDAXMLFile(const char* fileName, ifstream* stream);
 
 	SDDADefinition* m_definition;

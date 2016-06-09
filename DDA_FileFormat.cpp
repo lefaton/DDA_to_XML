@@ -38,6 +38,29 @@ void CDDA_FileFormat::ReadXMLDefinitionFile(unsigned int version)
 			pa.bitsize = param.attribute("bitsize").as_int();
 			pa.interval = param.attribute("interval").as_float();
 
+			if (!param.attribute("operator").empty())
+			{
+				char* operatorStr = (char *)malloc((strlen(param.attribute("operator").value()) + 1)*sizeof(char));
+				if (strcmp(operatorStr, "add")==0)
+				{
+					pa.op = SDDAParam::add;
+				}
+				if (strcmp(operatorStr, "sub") == 0)
+				{
+					pa.op = SDDAParam::sub;
+				}
+				if (strcmp(operatorStr, "mul") == 0)
+				{
+					pa.op = SDDAParam::mul;
+				}
+				if (strcmp(operatorStr, "div") == 0)
+				{
+					pa.op = SDDAParam::div;
+				}
+				
+				pa.val = param.attribute("value").as_int();
+			}
+
 			def.inputParameters.push_back(pa);
 		}
 
