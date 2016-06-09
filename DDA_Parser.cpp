@@ -7,10 +7,11 @@ using namespace std;
 unsigned int ReadHexUInt(char* buffer, unsigned int size)
 {
 	unsigned int valueResult = 0;
-	stringstream sb;
-	sb << buffer;
-
-	sb >> std::u32string >> valueResult;
+	
+	std::stringstream sstr;
+        sstr << buffer; 
+        sstr << std::hex;
+        sstr >> valueResult;
 
 	return valueResult;
 }
