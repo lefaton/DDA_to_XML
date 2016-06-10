@@ -3,6 +3,64 @@
 using namespace std;
 
 #pragma optimize("",off)
+#include <iostream>
+#include <string.h>
+#include <stdlib.h>  
+
+using namespace std;
+
+unsigned int swapbytes(unsigned int num, unsigned int size)
+{
+    unsigned int swapped = ((num>>24)&0xff) |
+                    ((num<<8)&0xff0000) |
+                    ((num>>8)&0xff00) |
+                    ((num<<24)&0xff000000);
+                    
+    switch(size)
+    {
+        case 24:
+        return swapped >> 8;
+        
+        case 16:
+        return swapped >> 16;
+        
+        case 8:
+        return swapped >> 24;
+    }
+    
+    return swapped;
+}
+
+int main() 
+{
+    char *buffer = new char[16];
+    for(int i = 0; i < 16; ++i)
+    {
+        buffer[i] = 'a' + i;
+    }
+
+    std::cout << "buffer: " << buffer << std::endl;
+
+    for(int i = 0; i < 3; ++i)
+    {
+        // copy char* to int.
+        unsigned int param = -1;
+        unsigned int sizeParam = 8 + 8 * i;
+        std::cout << sizeParam << std::endl;
+        memcpy(&param, buffer, sizeParam);
+        std::cout << param << std::endl;
+        
+        // debug
+        unsigned int strSize = sizeParam / 8;
+        char *str = (char*)malloc(strSize + 1);
+        memcpy(str, buffer, sizeParam);
+        str[strSize] = '\0';
+        std::cout << str << " buffer size: " << sizeParam << " result:" << swapbytes(param, sizeParam) << std::endl;
+        buffer += strSize;
+    }
+                
+                return 0;
+}
 
 unsigned int ReadHexUInt(char* buffer, unsigned int size)
 {
