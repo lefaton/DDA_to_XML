@@ -6,14 +6,21 @@ using namespace std;
 
 unsigned int ReadHexUInt(char* buffer, unsigned int size)
 {
-	unsigned int valueResult = 0;
-	
-	std::stringstream sstr;
-        sstr << buffer; 
-        sstr << std::hex;
-        sstr >> valueResult;
+	std::string strBuf;
+	for (const char* it = buffer; *it != 0; *it++)
+	{
+		if (!isspace(*it) && !isblank(*it) && *it != '\0')
+		{
+			strBuf.push_back(*it);
+		}
+	}
 
-	return valueResult;
+	const string& cBuf = static_cast<string&>(strBuf);
+
+	if (cBuf.size() > 0)
+		return std::stoul(cBuf);
+	else
+		return 0;
 }
 
 void CDDAParser::WriteDDAXMLFile(const char* fileName, ifstream* stream)
