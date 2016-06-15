@@ -11,74 +11,36 @@ using namespace std;
 
 unsigned int swapbytes(unsigned int num, unsigned int size)
 {
-    unsigned int swapped = ((num>>24)&0xff) |
-                    ((num<<8)&0xff0000) |
-                    ((num>>8)&0xff00) |
-                    ((num<<24)&0xff000000);
-                    
+	unsigned int swapped32 = ((num >> 24) & 0xff) |
+		((num << 8) & 0xff0000) |
+		((num >> 8) & 0xff00) |
+		((num << 24) & 0xff000000);
+
+	unsigned int result = 0;
+
     switch(size)
     {
-        case 24:
-        return swapped >> 8;
-        
-        case 16:
-        return swapped >> 16;
-        
-        case 8:
-        return swapped >> 24;
+		case 1:
+			result = num;
+			break;
+		case 2:
+			result = num;
+			break;
+        case 3:
+			result = swapped32 >> 16;
+			break;
     }
     
-    return swapped;
-}
-
-int main() 
-{
-    char *buffer = new char[16];
-    for(int i = 0; i < 16; ++i)
-    {
-        buffer[i] = 'a' + i;
-    }
-
-    std::cout << "buffer: " << buffer << std::endl;
-
-    for(int i = 0; i < 3; ++i)
-    {
-        // copy char* to int.
-        unsigned int param = -1;
-        unsigned int sizeParam = 8 + 8 * i;
-        std::cout << sizeParam << std::endl;
-        memcpy(&param, buffer, sizeParam);
-        std::cout << param << std::endl;
-        
-        // debug
-        unsigned int strSize = sizeParam / 8;
-        char *str = (char*)malloc(strSize + 1);
-        memcpy(str, buffer, sizeParam);
-        str[strSize] = '\0';
-        std::cout << str << " buffer size: " << sizeParam << " result:" << swapbytes(param, sizeParam) << std::endl;
-        buffer += strSize;
-    }
-                
-                return 0;
+	return result;
 }
 
 unsigned int ReadHexUInt(char* buffer, unsigned int size)
 {
-	std::string strBuf;
-	for (const char* it = buffer; *it != 0; *it++)
-	{
-		if (!isspace(*it) && !isblank(*it) && *it != '\0')
-		{
-			strBuf.push_back(*it);
-		}
-	}
+	// copy char* to int.
+	unsigned int param = 0;
+	memcpy(&param, buffer, size);
 
-	const string& cBuf = static_cast<string&>(strBuf);
-
-	if (cBuf.size() > 0)
-		return std::stoul(cBuf);
-	else
-		return 0;
+	return swapbytes(param, size);
 }
 
 void CDDAParser::WriteDDAXMLFile(const char* fileName, ifstream* stream)
@@ -86,31 +48,34 @@ void CDDAParser::WriteDDAXMLFile(const char* fileName, ifstream* stream)
 	//XML stuff
 	pugi::xml_document doc;
     
-
-
 	//parsing param
 	unsigned int counter = 0;
-	char* buffer = new char[16];
+	char* buffer = new char[BUFFER_SIZE];
 	unsigned int freq = m_definition->frequency;
 	unsigned int bytesToRead = 0;
 
 	while (m_seekPos < m_fileSize)
 	{
-		std::cout << "[TEST] ";
 		std::vector<SDDAParam>::iterator it = m_definition->inputParameters.begin();
 		while ( it != m_definition->inputParameters.end() )
-		{ 	
+		{
+			
+			for (int i = 0; i < BUFFER_SIZE; ++i)
+			{
+				buffer[i] = '\0' + i;
+			}
+			
 			if (counter == 0 || (counter % (unsigned int)(freq*it->interval) == 0))
 			{
 				bytesToRead = (unsigned int)it->bitsize / BYTE_SIZE;
 				GetBytes(stream, buffer, bytesToRead, m_seekPos);
-				
+
 				//GetLittleEndian
 				unsigned int  valueResult = ReadHexUInt(buffer, bytesToRead);
 				
 				if (DEBUG_ON)
 				{
-					std::cout << " / " << it->name << "=" << valueResult;
+					std::cout << "  " << it->name << "=" << valueResult;
 				}
 
 				m_seekPos += bytesToRead;
@@ -126,22 +91,14 @@ void CDDAParser::WriteDDAXMLFile(const char* fileName, ifstream* stream)
 			counter = 0;
 		}
 	}
-
+	delete[] buffer;
 }
 
 unsigned int CDDAParser::GetBytes(ifstream* file, char* buffer, unsigned int size, unsigned int offset)
 {
 	file->seekg(offset, ios::beg);
 	file->read(buffer, size);
-	if (1)
-	{
-		std::cout << "[DEBUG]";
-		for (unsigned int i = 0; i < size; i++)
-		{
-			std::cout << buffer[i];
-		}
-		std::cout << std::endl;
-	}
+	
 	return size;
 }
 
@@ -192,6 +149,7 @@ void CDDAParser::ParseFile(const char* fileName)
 		unsigned int DDAVersion = 0;
 		if (headerBuffer[2] == 'D' && headerBuffer[3] == 'D' && headerBuffer[4] == 'A')
 		{
+
 			m_seekPos += m_definition->headerSize;
 			WriteDDAXMLFile(fileName, &myDDAfile);
 		}
@@ -199,6 +157,7 @@ void CDDAParser::ParseFile(const char* fileName)
 		{
 			std::cout << "[ERROR] Not a DDA file - " << fileName << std::endl;
 		}
+		delete[] headerBuffer;
 
 		myDDAfile.close();
 		

@@ -1,8 +1,10 @@
-﻿Build started 07/06/2016 00:37:46.
+﻿Build started 15/06/2016 00:17:32.
      1>Project "C:\Users\Chat\Documents\GitHub\DDA_Reader\DDA_Reader.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D _MBCS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt DDA_Parser.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D _MBCS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt DDA_FileFormat.cpp DDA_Parser.cpp main.cpp
+         DDA_FileFormat.cpp
          DDA_Parser.cpp
+         main.cpp
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Chat\Documents\GitHub\DDA_Reader\Release\DDA_Reader.exe" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Chat\Documents\GitHub\DDA_Reader\Release\DDA_Reader.pdb" /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Chat\Documents\GitHub\DDA_Reader\Release\DDA_Reader.lib" /MACHINE:X86 /SAFESEH Release\DDA_FileFormat.obj
          Release\DDA_Parser.obj
@@ -15,4 +17,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.16
+Time Elapsed 00:00:01.73
