@@ -23,7 +23,7 @@ pugixml is Copyright (C) 2006-2015 Arseny Kapoulkine.
 
 using namespace std;
 
-#define DEBUG_ON 1
+#define DEBUG_ON 0
 #define BYTE_SIZE 8
 #define BUFFER_SIZE 16
 

@@ -26,6 +26,7 @@ int main(int argc, char *argv[])
 		result = 1;
 	}
 
+	std::cout << std::endl << std::endl << "Press any key!" << std::endl;
 	char a;
 	scanf_s("%c", &a);
 

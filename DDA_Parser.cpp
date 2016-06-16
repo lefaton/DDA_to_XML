@@ -47,19 +47,39 @@ void CDDAParser::WriteDDAXMLFile(const char* fileName, ifstream* stream)
 {	
 	//XML stuff
 	pugi::xml_document doc;
-    
+
+	pugi::xml_node rootNode = doc.append_child("description");
+	rootNode.set_name("DDA file");
+ 
 	//parsing param
+	unsigned long globalTiming = 0;
 	unsigned int counter = 0;
 	char* buffer = new char[BUFFER_SIZE];
 	unsigned int freq = m_definition->frequency;
 	unsigned int bytesToRead = 0;
 
+	//keeping last value set for each param for fill empty data every 1/frequency / second
+	unsigned int paramPos = 0;
+	std::vector<unsigned int> lastValue;
+	std::vector<SDDAParam>::iterator it = m_definition->inputParameters.begin();
+	while (it != m_definition->inputParameters.end())
+	{
+		lastValue.push_back(0);
+		it++;
+	}
+	
+	std::cout << "Decoding DDA file:" << std::endl;
 	while (m_seekPos < m_fileSize)
 	{
-		std::vector<SDDAParam>::iterator it = m_definition->inputParameters.begin();
+		//add XML entry for every param at each 1/frequency /second read
+		pugi::xml_node entryNode = rootNode.append_child("entry");
+		entryNode.append_attribute("timing");
+		entryNode.attribute("timing").set_value((float)globalTiming / freq);
+
+		std::cout << "\r" << (m_seekPos/(m_fileSize / 100)) << "%";
+		it = m_definition->inputParameters.begin();
 		while ( it != m_definition->inputParameters.end() )
-		{
-			
+		{		
 			for (int i = 0; i < BUFFER_SIZE; ++i)
 			{
 				buffer[i] = '\0' + i;
@@ -72,7 +92,9 @@ void CDDAParser::WriteDDAXMLFile(const char* fileName, ifstream* stream)
 
 				//GetLittleEndian
 				unsigned int  valueResult = ReadHexUInt(buffer, bytesToRead);
-				
+
+				lastValue[paramPos] = valueResult;//save last
+
 				if (DEBUG_ON)
 				{
 					std::cout << "  " << it->name << "=" << valueResult;
@@ -80,9 +102,36 @@ void CDDAParser::WriteDDAXMLFile(const char* fileName, ifstream* stream)
 
 				m_seekPos += bytesToRead;
 			}
+
+			//write XML entry parameters
+			entryNode.append_attribute(it->name);
+			unsigned int valToWrite = lastValue[paramPos];
+			//handle specific operations
+			if (it->op != SDDAParam::nil)
+			{
+				if (it->op == SDDAParam::add)
+					valToWrite += it->val;
+				if (it->op == SDDAParam::sub)
+					valToWrite -= it->val;
+				if (it->op == SDDAParam::mul)
+					valToWrite *= it->val;
+				if (it->op == SDDAParam::div)
+					valToWrite /= it->val;
+				if (it->op == SDDAParam::dif && valToWrite == it->val)
+					valToWrite = 0;
+			}
+
+			entryNode.attribute(it->name).set_value((unsigned int)valToWrite);
+
 			it++;
+			paramPos++;
 		}
-		std::cout << std::endl;
+		paramPos = 0;
+
+		if (DEBUG_ON)
+		{
+			std::cout << std::endl;
+		}
 		counter++;
 
 
@@ -90,8 +139,23 @@ void CDDAParser::WriteDDAXMLFile(const char* fileName, ifstream* stream)
 		{
 			counter = 0;
 		}
+		globalTiming++;
 	}
 	delete[] buffer;
+
+	//write XML
+	string fileNameXml = fileName;
+	fileNameXml = fileNameXml.substr(0, fileNameXml.size() - 3) + "xml";
+	std::cout << std::endl << std::endl << "Writing XML : ";
+	if (doc.save_file(fileNameXml.c_str()))
+	{
+		std::cout << "OK";
+	}
+	else
+	{
+		std::cout << "ERROR";
+	}
+	std::cout << std::endl;
 }
 
 unsigned int CDDAParser::GetBytes(ifstream* file, char* buffer, unsigned int size, unsigned int offset)

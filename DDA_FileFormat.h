@@ -38,6 +38,7 @@ struct SDDAParam{
 		mul,
 		div,
 		nil,
+		dif, //needs to be different from a defined value = value to skip
 		endOfOperator,
 	};
 

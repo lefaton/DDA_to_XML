@@ -1,5 +1,5 @@
 #include "DDA_FileFormat.h"
-
+#pragma optimize("",off)
 void CDDA_FileFormat::ReadXMLDefinitionFile(unsigned int version)
 {
 	if (version == 0)
@@ -39,21 +39,20 @@ void CDDA_FileFormat::ReadXMLDefinitionFile(unsigned int version)
 			pa.interval = param.attribute("interval").as_float();
 
 			if (!param.attribute("operator").empty())
-			{
-				char* operatorStr = (char *)malloc((strlen(param.attribute("operator").value()) + 1)*sizeof(char));
-				if (strcmp(operatorStr, "add")==0)
+			{				
+				if (strcmp(param.attribute("operator").value(), "add") == 0)
 				{
 					pa.op = SDDAParam::add;
 				}
-				if (strcmp(operatorStr, "sub") == 0)
+				if (strcmp(param.attribute("operator").value(), "sub") == 0)
 				{
 					pa.op = SDDAParam::sub;
 				}
-				if (strcmp(operatorStr, "mul") == 0)
+				if (strcmp(param.attribute("operator").value(), "mul") == 0)
 				{
 					pa.op = SDDAParam::mul;
 				}
-				if (strcmp(operatorStr, "div") == 0)
+				if (strcmp(param.attribute("operator").value(), "div") == 0)
 				{
 					pa.op = SDDAParam::div;
 				}
