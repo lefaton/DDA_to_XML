@@ -8,7 +8,7 @@ void CDDAParser::WriteDDAXMLFile(const char* fileName, ifstream* stream)
 	pugi::xml_document doc;
 
 	pugi::xml_node rootNode = doc.append_child("description");
-	rootNode.set_name("DDA file");
+	rootNode.set_name("DDA_file");
 	rootNode.append_attribute("version");
 	rootNode.attribute("version").set_value(m_definition->DDAversion);
 	rootNode.append_attribute("frequency");
