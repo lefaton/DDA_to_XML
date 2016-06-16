@@ -19,11 +19,13 @@ This software XML parser/writer is based on pugixml library (http://pugixml.org)
 pugixml is Copyright (C) 2006-2015 Arseny Kapoulkine.
 */
 
+#include <iomanip>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
+#include <stdlib.h>  
 
 #include "libs/pugixml/src/pugixml.hpp"
 

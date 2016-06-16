@@ -2,47 +2,6 @@
 
 using namespace std;
 
-#pragma optimize("",off)
-#include <iostream>
-#include <string.h>
-#include <stdlib.h>  
-
-using namespace std;
-
-unsigned int swapbytes(unsigned int num, unsigned int size)
-{
-	unsigned int swapped32 = ((num >> 24) & 0xff) |
-		((num << 8) & 0xff0000) |
-		((num >> 8) & 0xff00) |
-		((num << 24) & 0xff000000);
-
-	unsigned int result = 0;
-
-    switch(size)
-    {
-		case 1:
-			result = num;
-			break;
-		case 2:
-			result = num;
-			break;
-        case 3:
-			result = swapped32 >> 16;
-			break;
-    }
-    
-	return result;
-}
-
-unsigned int ReadHexUInt(char* buffer, unsigned int size)
-{
-	// copy char* to int.
-	unsigned int param = 0;
-	memcpy(&param, buffer, size);
-
-	return swapbytes(param, size);
-}
-
 void CDDAParser::WriteDDAXMLFile(const char* fileName, ifstream* stream)
 {	
 	//XML stuff
@@ -50,7 +9,11 @@ void CDDAParser::WriteDDAXMLFile(const char* fileName, ifstream* stream)
 
 	pugi::xml_node rootNode = doc.append_child("description");
 	rootNode.set_name("DDA file");
- 
+	rootNode.append_attribute("version");
+	rootNode.attribute("version").set_value(m_definition->DDAversion);
+	rootNode.append_attribute("frequency");
+	rootNode.attribute("frequency").set_value(m_definition->frequency);
+
 	//parsing param
 	unsigned long globalTiming = 0;
 	unsigned int counter = 0;
@@ -73,8 +36,13 @@ void CDDAParser::WriteDDAXMLFile(const char* fileName, ifstream* stream)
 	{
 		//add XML entry for every param at each 1/frequency /second read
 		pugi::xml_node entryNode = rootNode.append_child("entry");
+		
 		entryNode.append_attribute("timing");
-		entryNode.attribute("timing").set_value((float)globalTiming / freq);
+		double t = (double)globalTiming / freq;
+		stringstream floatStream;
+		floatStream << fixed << setprecision(2) << t;
+		string s = floatStream.str();
+		entryNode.attribute("timing").set_value(s.c_str());
 
 		std::cout << "\r" << (m_seekPos/(m_fileSize / 100)) << "%";
 		it = m_definition->inputParameters.begin();
@@ -90,8 +58,8 @@ void CDDAParser::WriteDDAXMLFile(const char* fileName, ifstream* stream)
 				bytesToRead = (unsigned int)it->bitsize / BYTE_SIZE;
 				GetBytes(stream, buffer, bytesToRead, m_seekPos);
 
-				//GetLittleEndian
-				unsigned int  valueResult = ReadHexUInt(buffer, bytesToRead);
+				unsigned int valueResult = 0;
+				memcpy(&valueResult, buffer, bytesToRead);
 
 				lastValue[paramPos] = valueResult;//save last
 
@@ -104,7 +72,7 @@ void CDDAParser::WriteDDAXMLFile(const char* fileName, ifstream* stream)
 			}
 
 			//write XML entry parameters
-			entryNode.append_attribute(it->name);
+			pugi::xml_node paramNode = entryNode.append_child(it->name);
 			unsigned int valToWrite = lastValue[paramPos];
 			//handle specific operations
 			if (it->op != SDDAParam::nil)
@@ -120,9 +88,11 @@ void CDDAParser::WriteDDAXMLFile(const char* fileName, ifstream* stream)
 				if (it->op == SDDAParam::dif && valToWrite == it->val)
 					valToWrite = 0;
 			}
-
-			entryNode.attribute(it->name).set_value((unsigned int)valToWrite);
-
+			stringstream uintStream;
+			uintStream << valToWrite;
+			s = uintStream.str();
+			paramNode.append_child(pugi::node_pcdata).set_value(s.c_str());
+			
 			it++;
 			paramPos++;
 		}

@@ -1,5 +1,5 @@
 #include "DDA_FileFormat.h"
-#pragma optimize("",off)
+
 void CDDA_FileFormat::ReadXMLDefinitionFile(unsigned int version)
 {
 	if (version == 0)
@@ -55,6 +55,10 @@ void CDDA_FileFormat::ReadXMLDefinitionFile(unsigned int version)
 				if (strcmp(param.attribute("operator").value(), "div") == 0)
 				{
 					pa.op = SDDAParam::div;
+				}
+				if (strcmp(param.attribute("operator").value(), "dif") == 0)
+				{
+					pa.op = SDDAParam::dif;
 				}
 				
 				pa.val = param.attribute("value").as_int();
