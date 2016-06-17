@@ -16,3 +16,5 @@ I tested it on my own DDA run coming from my 2014 Ducati Streetfighter 848.
 The DDA itself is a used one I bought on ebay (apparently coming from a 1198SBK).
 Some info about the 1198SBK are still in the DDA files headers (Not sure why).
 The DDA version is 4.
+
+You can take the DDA_Reader.7z archive directly for execute the program.
