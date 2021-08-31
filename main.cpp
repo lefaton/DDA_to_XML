@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 		myDDAfile.close();
 		std::cout << "DDA file " << argv[1] << " exists!" <<std::endl;
 		CDDAParser* myParser = new CDDAParser();
-        myParser->ParseFile(argv[1]);
+                myParser->ParseFile(argv[1]);
 
 		result = 1;
 	}
