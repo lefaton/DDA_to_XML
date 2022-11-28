@@ -32,7 +32,8 @@ void CDDA_FileFormat::ReadXMLDefinitionFile(unsigned int version)
 			SDDAParam pa;
 
 			char* nameStr = (char *)malloc((strlen(param.attribute("name").value()) + 1)*sizeof(char));
-			sprintf_s(nameStr, strlen(param.attribute("name").value()) + 1, "%s", param.attribute("name").value());
+			// sprintf_s(nameStr, strlen(param.attribute("name").value()) + 1, "%s", param.attribute("name").value());
+			sprintf(nameStr, "%s", param.attribute("name").value());
 
 			pa.name = nameStr;
 			pa.bitsize = param.attribute("bitsize").as_int();

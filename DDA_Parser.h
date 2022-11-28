@@ -21,8 +21,8 @@ class CDDAParser{
 
 public:
 
-	CDDAParser::CDDAParser() :m_seekPos(0), m_fileSize(0){}
-	CDDAParser::~CDDAParser(){}
+	CDDAParser() :m_seekPos(0), m_fileSize(0){}
+	~CDDAParser(){}
 
 	void ParseFile(const char* fileName);
 
