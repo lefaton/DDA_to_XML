@@ -21,7 +21,7 @@ pugixml is Copyright (C) 2006-2015 Arseny Kapoulkine.
 
 struct SDDAParam{
 
-	SDDAParam::SDDAParam() :name(nullptr), bitsize(8), interval(1.0), op(EOperator::nil), val(0)
+	SDDAParam() :name(nullptr), bitsize(8), interval(1.0), op(EOperator::nil), val(0)
 	{}
 
 	enum EOperator{
@@ -43,12 +43,12 @@ struct SDDAParam{
 
 struct SDDADefinition{
 
-	SDDADefinition::SDDADefinition()
+	SDDADefinition()
 	{
         
 	}
 
-	SDDADefinition::~SDDADefinition()
+	~SDDADefinition()
 	{
 		//std::vector<SDDAParam>::iterator it = inputParameters.begin();
 		//while (it != inputParameters.end())
@@ -70,8 +70,8 @@ class CDDA_FileFormat
 {
 public:
 
-	CDDA_FileFormat::CDDA_FileFormat(){}
-	CDDA_FileFormat::~CDDA_FileFormat(){}
+	CDDA_FileFormat(){}
+	~CDDA_FileFormat(){}
 	
 	SDDADefinition* GetDefinition(){ return &m_definition; }
 	int InitDefinition(unsigned int version);
