@@ -1,84 +1,43 @@
 /*
 DDA_Reader - Copyright (C) 2016 Matthieu Dirrenberger
-
 This program idea is mainly based on the work done by Andrew Allan in 2009.
-The white paper he wrote and the code he gave me was really helpfull for speedup
+The white paper he wrote and the code he gave me was really helpful for speeding up
 the reverse engineering part (http://www.ducati.ms/).
-
 This software XML parser/writer is based on pugixml library (http://pugixml.org).
 pugixml is Copyright (C) 2006-2015 Arseny Kapoulkine.
 */
-
-#include <iomanip>
+#pragma once
 #include <iostream>
-#include <fstream>
-#include <sstream>
 #include <string>
 #include <vector>
-#include <stdlib.h>  
-
 #include "libs/pugixml/src/pugixml.hpp"
-
-struct SDDAParam{
-
-	SDDAParam::SDDAParam() :name(nullptr), bitsize(8), interval(1.0), op(EOperator::nil), val(0)
-	{}
-
-	enum EOperator{
-		add,
-		sub,
-		mul,
-		div,
-		nil,
-		dif, //needs to be different from a defined value = value to skip
-		endOfOperator,
-	};
-
-	char* name;
-	unsigned int bitsize; //bit storage size for the current parameter
-	float interval; //update interval within a second
-	EOperator op; //operator to apply after the binary read for transform it in human readable value
-	unsigned int val; //value used by the operator
+struct SDDAParam {
+    enum class EOperator { add, sub, mul, div, nil, dif };
+    SDDAParam() : name(""), bitsize(8), interval(1.0f), op(EOperator::nil), val(0) {}
+    std::string  name;
+    unsigned int bitsize;
+    float        interval;
+    EOperator    op;
+    unsigned int val;
 };
-
-struct SDDADefinition{
-
-	SDDADefinition::SDDADefinition()
-	{
-        
-	}
-
-	SDDADefinition::~SDDADefinition()
-	{
-		//std::vector<SDDAParam>::iterator it = inputParameters.begin();
-		//while (it != inputParameters.end())
-		//{
-		//	free (it->name);
-		//	it++;
-		//}
-	}
-	unsigned int DDAversion;
-	unsigned int frequency;
-	float clock;
-	unsigned int headerSize;
-	
-	std::vector<SDDAParam>inputParameters;
+struct SDDADefinition {
+    unsigned int            DDAversion  = 0;
+    unsigned int            frequency   = 0;
+    float                   clock       = 0.0f;
+    unsigned int            headerSize  = 0;
+    std::vector<SDDAParam>  inputParameters;
 };
-
-//class used for give easy access to the data structure based on the XML description file
-class CDDA_FileFormat
-{
+class CDDA_FileFormat {
 public:
-
-	CDDA_FileFormat::CDDA_FileFormat(){}
-	CDDA_FileFormat::~CDDA_FileFormat(){}
-	
-	SDDADefinition* GetDefinition(){ return &m_definition; }
-	int InitDefinition(unsigned int version);
-	void PrintDefinition();
-
+    CDDA_FileFormat()  = default;
+    ~CDDA_FileFormat() = default;
+    CDDA_FileFormat(const CDDA_FileFormat&)            = delete;
+    CDDA_FileFormat& operator=(const CDDA_FileFormat&) = delete;
+    SDDADefinition*       GetDefinition()      { return &m_definition; }
+    const SDDADefinition* GetDefinition() const { return &m_definition; }
+    bool InitDefinition(unsigned int version);
+    void PrintDefinition() const;
 private:
-	void ReadXMLDefinitionFile(unsigned int version);
-
-	SDDADefinition m_definition;
+    bool ReadXMLDefinitionFile(unsigned int version);
+    SDDADefinition m_definition;
 };

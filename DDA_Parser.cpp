@@ -1,199 +1,74 @@
 #include "DDA_Parser.h"
-
-using namespace std;
-
-void CDDAParser::WriteDDAXMLFile(const char* fileName, ifstream* stream)
-{	
-	//XML stuff
-	pugi::xml_document doc;
-
-	pugi::xml_node rootNode = doc.append_child("description");
-	rootNode.set_name("DDA_file");
-	rootNode.append_attribute("version");
-	rootNode.attribute("version").set_value(m_definition->DDAversion);
-	rootNode.append_attribute("frequency");
-	rootNode.attribute("frequency").set_value(m_definition->frequency);
-
-	//parsing param
-	unsigned long globalTiming = 0;
-	unsigned int counter = 0;
-	char* buffer = new char[BUFFER_SIZE];
-	unsigned int freq = m_definition->frequency;
-	unsigned int bytesToRead = 0;
-
-	//keeping last value set for each param for fill empty data every 1/frequency / second
-	unsigned int paramPos = 0;
-	std::vector<unsigned int> lastValue;
-	std::vector<SDDAParam>::iterator it = m_definition->inputParameters.begin();
-	while (it != m_definition->inputParameters.end())
-	{
-		lastValue.push_back(0);
-		it++;
-	}
-	
-	std::cout << "Decoding DDA file:" << std::endl;
-	while (m_seekPos < m_fileSize)
-	{
-		//add XML entry for every param at each 1/frequency /second read
-		pugi::xml_node entryNode = rootNode.append_child("entry");
-		
-		entryNode.append_attribute("timing");
-		double t = (double)globalTiming / freq;
-		stringstream floatStream;
-		floatStream << fixed << setprecision(2) << t;
-		string s = floatStream.str();
-		entryNode.attribute("timing").set_value(s.c_str());
-
-		std::cout << "\r" << (m_seekPos/(m_fileSize / 100)) << "%";
-		it = m_definition->inputParameters.begin();
-		while ( it != m_definition->inputParameters.end() )
-		{		
-			for (int i = 0; i < BUFFER_SIZE; ++i)
-			{
-				buffer[i] = '\0' + i;
-			}
-			
-			if (counter == 0 || (counter % (unsigned int)(freq*it->interval) == 0))
-			{
-				bytesToRead = (unsigned int)it->bitsize / BYTE_SIZE;
-				GetBytes(stream, buffer, bytesToRead, m_seekPos);
-
-				unsigned int valueResult = 0;
-				memcpy(&valueResult, buffer, bytesToRead);
-
-				lastValue[paramPos] = valueResult;//save last
-
-				if (DEBUG_ON)
-				{
-					std::cout << "  " << it->name << "=" << valueResult;
-				}
-
-				m_seekPos += bytesToRead;
-			}
-
-			//write XML entry parameters
-			pugi::xml_node paramNode = entryNode.append_child(it->name);
-			unsigned int valToWrite = lastValue[paramPos];
-			//handle specific operations
-			if (it->op != SDDAParam::nil)
-			{
-				if (it->op == SDDAParam::add)
-					valToWrite += it->val;
-				if (it->op == SDDAParam::sub)
-					valToWrite -= it->val;
-				if (it->op == SDDAParam::mul)
-					valToWrite *= it->val;
-				if (it->op == SDDAParam::div)
-					valToWrite /= it->val;
-				if (it->op == SDDAParam::dif && valToWrite == it->val)
-					valToWrite = 0;
-			}
-			stringstream uintStream;
-			uintStream << valToWrite;
-			s = uintStream.str();
-			paramNode.append_child(pugi::node_pcdata).set_value(s.c_str());
-			
-			it++;
-			paramPos++;
-		}
-		paramPos = 0;
-
-		if (DEBUG_ON)
-		{
-			std::cout << std::endl;
-		}
-		counter++;
-
-
-		if (counter % freq == 0)
-		{
-			counter = 0;
-		}
-		globalTiming++;
-	}
-	delete[] buffer;
-
-	//write XML
-	string fileNameXml = fileName;
-	fileNameXml = fileNameXml.substr(0, fileNameXml.size() - 3) + "xml";
-	std::cout << std::endl << std::endl << "Writing XML : ";
-	if (doc.save_file(fileNameXml.c_str()))
-	{
-		std::cout << "OK";
-	}
-	else
-	{
-		std::cout << "ERROR";
-	}
-	std::cout << std::endl;
+#include "DDA_Operators.h"
+#include <iostream>
+#include <sstream>
+#include <iomanip>
+#include <vector>
+#include <cstring>
+bool CDDAParser::GetBytes(std::ifstream& file, char* buffer, unsigned int size, unsigned int offset) {
+    file.seekg(offset, std::ios::beg);
+    if (file.fail()) { std::cout<<"[ERROR] seekg failed at offset "<<offset<<std::endl; return false; }
+    file.read(buffer, size);
+    if (file.fail() && !file.eof()) { std::cout<<"[ERROR] read failed at offset "<<offset<<std::endl; return false; }
+    return true;
 }
-
-unsigned int CDDAParser::GetBytes(ifstream* file, char* buffer, unsigned int size, unsigned int offset)
-{
-	file->seekg(offset, ios::beg);
-	file->read(buffer, size);
-	
-	return size;
+bool CDDAParser::WriteDDAXMLFile(const char* fileName, std::ifstream& stream) {
+    pugi::xml_document doc;
+    pugi::xml_node rootNode = doc.append_child("DDA_file");
+    rootNode.append_attribute("version").set_value(m_definition.DDAversion);
+    rootNode.append_attribute("frequency").set_value(m_definition.frequency);
+    unsigned int counter = 0, freq = m_definition.frequency;
+    char buffer[BUFFER_SIZE];
+    std::vector<unsigned int> lastValue(m_definition.inputParameters.size(), 0);
+    unsigned int bytesPerCycle = 0;
+    for (const auto& p : m_definition.inputParameters) {
+        unsigned int e = static_cast<unsigned int>(freq * p.interval); if (e==0) e=1;
+        bytesPerCycle += (freq/e) * (p.bitsize/BYTE_SIZE);
+    }
+    if (bytesPerCycle==0) { std::cout<<"[ERROR] bytesPerCycle=0"\n'; return false; }
+    unsigned int totalFrames = ((m_fileSize-m_definition.headerSize)/bytesPerCycle)*freq;
+    std::cout<<"Decoding DDA file ("<<totalFrames<<" frames):"<<std::endl;
+    for (unsigned int f = 0; f < totalFrames; ++f) {
+        pugi::xml_node entry = rootNode.append_child("entry");
+        std::ostringstream ts; ts<<std::fixed<<std::setprecision(2)<<(double)f/freq;
+        entry.append_attribute("timing").set_value(ts.str().c_str());
+        std::cout<<"\r"<<(f*100/totalFrames)<<"%";
+        std::size_t i=0;
+        for (const auto& param : m_definition.inputParameters) {
+            unsigned int ev = static_cast<unsigned int>(freq*param.interval); if(ev==0) ev=1;
+            if (counter==0 || counter%ev==0) {
+                unsigned int nb = param.bitsize/BYTE_SIZE;
+                std::memset(buffer,0,NUFFER_SIZE);
+                if (!GetBytes(stream,buffer,nb,m_seekPos)) return false;
+                unsigned int v=0; std::memcpy(&v,buffer,nb);
+                lastValue[i]=v; m_seekPos+=nb;
+            }
+            pugi::xml_node n = entry.append_child(param.name.c_str());
+            n.append_child(pugi::node_pcdata).set_value(std::to_string(ApplyOperator(lastValue[i],param.op,param.val)).c_str());
+            ++i;
+        }
+        counter=(counter+1)%freq;
+    }
+    std::string out(fileName);
+    if (out.size()>=4 && out.substr(out.size()-4)==".dda") out=out.substr(0,out.size()-4)+".xml"; else out+=".xml";
+    std::cout<<std::endl<<"Writing XML: ";
+    if (doc.save_file(out.c_str())) { std::cout<<"OK -> "<<out<<std::endl; return true; }
+    std::cout<<"[ERROR] Could not write "<<out<<std::endl; return false;
 }
-
-void CDDAParser::ParseFile(const char* fileName)
-{
-	
-	m_seekPos = 0;
-
-	ifstream myDDAfile;
-	myDDAfile.open(fileName, std::ifstream::binary | ios::in);
-
-	if (myDDAfile.is_open() && myDDAfile.good())
-	{
-		//get DDA version to read
-		char versionChar[2];
-		myDDAfile.get(*versionChar);
-		unsigned int version = (unsigned char)versionChar[0];
-
-		//actually get XML definition
-		CDDA_FileFormat* myDDAFileFormat = new CDDA_FileFormat();
-		if (myDDAFileFormat->InitDefinition(version) == 1)
-		{
-			std::cout << "DDA XML definition file loaded!\n" << std::endl;
-			if (DEBUG_ON)
-			{
-				myDDAFileFormat->PrintDefinition();
-			}
-		}
-		else
-		{
-			myDDAfile.close();
-			std::cout << "[ERROR] XML definition file error" << std::endl;
-			return;
-		}
-
-		m_definition = myDDAFileFormat->GetDefinition();
-
-		// get length of file:
-		myDDAfile.seekg(0, myDDAfile.end);
-		m_fileSize = (unsigned int)myDDAfile.tellg();
-		myDDAfile.seekg(0, myDDAfile.beg);
-
-		//read header first
-		char* headerBuffer = new char[m_definition->headerSize*sizeof(char)];
-		GetBytes(&myDDAfile, headerBuffer, m_definition->headerSize, 0);
-
-		//process header info
-		unsigned int DDAVersion = 0;
-		if (headerBuffer[2] == 'D' && headerBuffer[3] == 'D' && headerBuffer[4] == 'A')
-		{
-
-			m_seekPos += m_definition->headerSize;
-			WriteDDAXMLFile(fileName, &myDDAfile);
-		}
-		else
-		{
-			std::cout << "[ERROR] Not a DDA file - " << fileName << std::endl;
-		}
-		delete[] headerBuffer;
-
-		myDDAfile.close();
-		
-	}
+bool CDDAParser::ParseFile(const char* fileName) {
+    m_seekPos = 0;
+    std::ifstream f(fileName, std::ifstream::binary|std::ios::in);
+    if (!f.is_open()||!f.good()) { std::cout<<"[ERROR] Cannot open "<<fileName<<std::endl; return false; }
+    unsigned char vbyte=0; f.read(reinterpret_cast<char*>(&vbyte),1);
+    if (f.fail()) { std::cout<<"[ERROR] Cannot read version byte."<<std::endl; return false; }
+    CDDA_FileFormat ff;
+    if (!ff.InitDefinition(vbyte)) { std::cout<<"[ERROR] XML definition file error."<<std::endl; return false; }
+    m_definition = *ff.GetDefinition();
+    f.seekg(0,std::ios::end); m_fileSize=(unsigned int)f.tellg(); f.seekg(0,std::ios::beg);
+    if (m_definition.headerSize<5) { std::cout<<"[ERROR] Header too small."<<std::endl; return false; }
+    std::vector<char> hh(m_definition.headerSize,0);
+    if (!GetBytes(f,hh.data(),m_definition.headerSize,0)) { std::cout<<"[ERROR] Cannot read header."<<std::endl; return false; }
+    if (!(hh[2]=='D'&&hh[3]=='D'&&hh[4]=='A')) { std::cout<<"[ERROR] Not a DDA file: "<<fileName<<std::endl; return false; }
+    m_seekPos = m_definition.headerSize;
+    return WriteDDAXMLFile(fileName,f);
 }
